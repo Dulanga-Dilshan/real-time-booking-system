@@ -2,24 +2,39 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\BusRouteTemplateSeeder;
+use Database\Seeders\BusRouteSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        \App\Models\User::create([
+            'name'     => 'Admin',
+            'email'    => 'admin@bus.com',
+            'password' => bcrypt('password'),
+            'role'     => 'admin',
         ]);
+
+        \App\Models\User::create([
+            'name'     => 'John Passenger',
+            'email'    => 'john@bus.com',
+            'password' => bcrypt('password'),
+            'role'     => 'passenger',
+        ]);
+
+        \App\Models\User::create([
+            'name'     => 'Driver 1',
+            'email'    => 'driver@bus.com',
+            'password' => bcrypt('password'),
+            'role'     => 'bus_staff',
+        ]);
+
+        $this->call(BusRouteTemplateSeeder::class);
+        $this->call(BusRouteSeeder::class);
     }
 }
