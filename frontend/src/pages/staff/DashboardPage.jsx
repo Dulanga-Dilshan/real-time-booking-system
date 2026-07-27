@@ -76,9 +76,13 @@ export default function StaffDashboardPage() {
   const [bookedSeats, setBookedSeats]         = useState([])
   const gpsWatchRef = useRef(null)
   const lastSentRef = useRef(0)
+  const fetchedRef = useRef(false)
   const today       = dayjs().format('YYYY-MM-DD')
 
   useEffect(() => {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
+    console.debug('Fetching driver dashboard')
     getDriverDashboard()
       .then(res => {
         setData(res.data)
@@ -89,6 +93,14 @@ export default function StaffDashboardPage() {
       })
       .catch(() => toast.error('Failed to load dashboard'))
       .finally(() => setLoading(false))
+
+    return () => {
+      // cleanup GPS watch if component unmounts
+      if (gpsWatchRef.current !== null) {
+        try { navigator.geolocation.clearWatch(gpsWatchRef.current) } catch (e) {}
+        gpsWatchRef.current = null
+      }
+    }
   }, [])
 
   // Real-time seat updates

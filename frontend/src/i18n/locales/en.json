@@ -54,7 +54,7 @@
     "gender_other": "Other",
     "nic": "NIC number",
     "email": "Email address",
-    "email_hint": "Optional — for receipt",
+    "email_hint": "for Email receipt",
     "board_at": "Board at",
     "alight_at": "Alight at",
     "select_board": "Select boarding stop",

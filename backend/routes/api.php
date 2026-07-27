@@ -44,7 +44,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Driver (bus_staff)
-    Route::middleware(['auth:sanctum', 'driver'])->prefix('driver')->group(function () {
+    Route::middleware(['auth:sanctum', 'role.staff'])->prefix('driver')->group(function () {
         Route::get('/',        [DriverController::class, 'dashboard']);
         Route::post('/location', [DriverController::class, 'updateLocation']);
         Route::post('/gps',      [DriverController::class, 'updateGps']);
@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Admin
-    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::middleware(['auth:sanctum', 'role.admin'])->prefix('admin')->group(function () {
         Route::get('/stats', [AdminBookingController::class, 'stats']);
 
         Route::apiResource('routes',           AdminRouteController::class);

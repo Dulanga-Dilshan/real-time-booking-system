@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Return JSON for unauthenticated API guests instead of redirecting
+        $middleware->redirectGuestsTo(fn() => response()->json(['message' => 'Unauthenticated.'], 401));
+
         $middleware->alias([
             'role.admin'  => \App\Http\Middleware\RequireAdminRole::class,
             'role.staff'  => \App\Http\Middleware\RequireBusStaffRole::class,
@@ -25,25 +28,25 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         // Return JSON for API auth errors
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
         });
 
         $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Forbidden.'], 403);
             }
         });
 
         $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json(['message' => 'Resource not found.'], 404);
             }
         });
 
         $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
                     'message' => 'Validation failed.',
                     'errors'  => $e->errors(),

@@ -1,4 +1,3 @@
-"export default function BookingPage(){return null}" 
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -74,7 +73,7 @@ export default function BookingPage() {
     setBookedSeats(newBooked)
     setSelectedSeats(prev => {
       const removed = prev.filter(s => newBooked.includes(s))
-      if (removed.length > 0) toast.error('A seat you selected was just booked!')
+      if (removed.length > 0 && !submitting) toast.error('A seat you selected was just booked!')
       return prev.filter(s => !newBooked.includes(s))
     })
   })
@@ -98,6 +97,11 @@ export default function BookingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (selectedSeats.length === 0) { toast.error('Select at least one seat'); return }
+    if (!form.passenger_name?.trim()) { toast.error('Enter passenger name'); return }
+    if (!form.gender) { toast.error('Select gender'); return }
+    if (!form.nic?.trim()) { toast.error('Enter NIC number'); return }
+    if (!/^(?:\d{9}[vVxX]|\d{12})$/.test(form.nic.trim())) { toast.error('Enter a valid NIC number'); return }
+    if (!form.email?.trim()) { toast.error('Email is required'); return }
     if (!form.board_stop_index)  { toast.error('Select boarding stop'); return }
     if (!form.alight_stop_index) { toast.error('Select alighting stop'); return }
     setSubmitting(true)
@@ -108,8 +112,8 @@ export default function BookingPage() {
         travel_date:       date,
         passenger_name:    form.passenger_name,
         gender:            form.gender,
-        email:             form.email || undefined,
-        nic:               form.nic,
+        email:             form.email.trim(),
+        nic:               form.nic.trim(),
         board_stop_index:  parseInt(form.board_stop_index),
         alight_stop_index: parseInt(form.alight_stop_index),
         payment_method:    form.payment_method,
@@ -311,11 +315,12 @@ export default function BookingPage() {
               />
               <div className="col-span-2">
                 <Input
-                  label={`${t('booking.email')} (${t('booking.email_hint')})`}
+                  label={`${t('booking.email')}`}
                   type="email"
                   value={form.email}
                   onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                   placeholder="you@example.com"
+                  required
                 />
               </div>
 
