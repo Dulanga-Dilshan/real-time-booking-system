@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "dev:all": "concurrently --names \"Reverb,Queue,Serve\" --prefix-colors \"green,yellow,magenta\" \"php artisan reverb:start --host=0.0.0.0 --port=8080\" \"php artisan queue:work --sleep=3 --tries=3\" \"php artisan serve --host=0.0.0.0 --port=8000\""
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
