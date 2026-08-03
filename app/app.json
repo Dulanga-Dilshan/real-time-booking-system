@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Bus Booking",
+    "slug": "bus-booking-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#2563eb"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.busbook.mobile"
+    },
+    "android": {
+      "package": "com.busbook.mobile",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
