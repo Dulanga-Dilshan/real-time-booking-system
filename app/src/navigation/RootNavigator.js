@@ -19,6 +19,8 @@ import AdminBookingsScreen from '@/screens/admin/BookingsScreen'
 import AdminDriversScreen from '@/screens/admin/DriversScreen'
 import AdminTemplatesScreen from '@/screens/admin/TemplatesScreen'
 
+import AppHeader from './AppHeader'
+
 import {
   requireAuth, requireAdmin, requireStaff,
   redirectIfAuthenticated, blockBusStaff,
@@ -29,35 +31,25 @@ const Stack = createNativeStackNavigator()
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        {/* Public — matches "/" */}
-        <Stack.Screen name="Home" component={blockBusStaff(HomeScreen)} options={{ title: 'Search Buses' }} />
-
-        {/* matches "/auth" */}
-        <Stack.Screen name="Auth" component={redirectIfAuthenticated(AuthScreen)} options={{ headerShown: false }} />
-        <Stack.Screen name="ServerSettings" component={ServerSettingsScreen} options={{ title: 'Server Settings' }} />
-
-        {/* matches "/booking/:routeId" etc */}
-        <Stack.Screen name="Booking" component={blockBusStaff(BookingScreen)} options={{ title: 'Book Seat' }} />
-        <Stack.Screen name="BookingConfirm" component={blockBusStaff(BookingConfirmScreen)} options={{ title: 'Confirmation' }} />
-        <Stack.Screen name="CancelBooking" component={blockBusStaff(CancelBookingScreen)} options={{ title: 'Cancel Booking' }} />
-
-        {/* matches "/track", "/map/:routeId" — no guard on web */}
-        <Stack.Screen name="Track" component={TrackScreen} options={{ title: 'Track Buses' }} />
-        <Stack.Screen name="Map" component={MapScreen} options={{ title: 'Live Map' }} />
-
-        {/* matches "/profile" — RequireAuth + BlockBusStaff */}
-        <Stack.Screen name="Profile" component={requireAuth(blockBusStaff(ProfileScreen))} options={{ title: 'My Profile' }} />
-
-        {/* matches "/staff" — RequireStaff */}
-        <Stack.Screen name="Staff" component={requireStaff(DriverDashboardScreen)} options={{ title: 'My Route' }} />
-
-        {/* matches "/admin/*" — RequireAdmin */}
-        <Stack.Screen name="AdminDashboard" component={requireAdmin(AdminDashboardScreen)} options={{ title: 'Admin Dashboard' }} />
-        <Stack.Screen name="AdminRoutes" component={requireAdmin(AdminRoutesScreen)} options={{ title: 'Routes' }} />
-        <Stack.Screen name="AdminBookings" component={requireAdmin(AdminBookingsScreen)} options={{ title: 'Bookings' }} />
-        <Stack.Screen name="AdminDrivers" component={requireAdmin(AdminDriversScreen)} options={{ title: 'Drivers' }} />
-        <Stack.Screen name="AdminTemplates" component={requireAdmin(AdminTemplatesScreen)} options={{ title: 'Route Templates' }} />
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{ header: (props) => <AppHeader {...props} /> }}
+      >
+        <Stack.Screen name="Home" component={blockBusStaff(HomeScreen)} />
+        <Stack.Screen name="Auth" component={redirectIfAuthenticated(AuthScreen)} />
+        <Stack.Screen name="ServerSettings" component={ServerSettingsScreen} />
+        <Stack.Screen name="Booking" component={blockBusStaff(BookingScreen)} />
+        <Stack.Screen name="BookingConfirm" component={blockBusStaff(BookingConfirmScreen)} />
+        <Stack.Screen name="CancelBooking" component={blockBusStaff(CancelBookingScreen)} />
+        <Stack.Screen name="Track" component={TrackScreen} />
+        <Stack.Screen name="Map" component={MapScreen} />
+        <Stack.Screen name="Profile" component={requireAuth(blockBusStaff(ProfileScreen))} />
+        <Stack.Screen name="Staff" component={requireStaff(DriverDashboardScreen)} />
+        <Stack.Screen name="AdminDashboard" component={requireAdmin(AdminDashboardScreen)} />
+        <Stack.Screen name="AdminRoutes" component={requireAdmin(AdminRoutesScreen)} />
+        <Stack.Screen name="AdminBookings" component={requireAdmin(AdminBookingsScreen)} />
+        <Stack.Screen name="AdminDrivers" component={requireAdmin(AdminDriversScreen)} />
+        <Stack.Screen name="AdminTemplates" component={requireAdmin(AdminTemplatesScreen)} />
       </Stack.Navigator>
     </NavigationContainer>
   )
