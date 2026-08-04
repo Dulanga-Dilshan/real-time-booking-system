@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native'
 import dayjs from 'dayjs'
 import { getRoutes } from '@/api/routes'
@@ -21,7 +21,7 @@ function RouteCard({ route, date, onSeatsUpdate, onPress }) {
       : 'text-red-500 dark:text-red-400'
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPress={route.available_seats > 0 ? onPress : undefined}>
       <Card className="p-5 mb-3">
         <View className="flex-row items-center gap-2 mb-2 flex-wrap">
           {route.bus_number && (
@@ -34,7 +34,7 @@ function RouteCard({ route, date, onSeatsUpdate, onPress }) {
           <Text className="font-semibold text-slate-800 dark:text-white">{route.to_location}</Text>
         </View>
 
-        <View className="flex-row items-center gap-3 flex-wrap">
+        <View className="flex-row items-center gap-3 flex-wrap mb-3">
           <Text className="text-sm text-slate-500 dark:text-slate-400">
             {dayjs(`1970-01-01T${route.departure_time}`).format('h:mm A')} → {dayjs(`1970-01-01T${route.arrival_time}`).format('h:mm A')}
           </Text>
@@ -42,30 +42,53 @@ function RouteCard({ route, date, onSeatsUpdate, onPress }) {
           <Text className={`text-sm font-medium ${seatColor}`}>
             {route.available_seats > 0 ? `${route.available_seats} seats left` : 'Full'}
           </Text>
+          <Text className="text-slate-300 dark:text-slate-700">·</Text>
+          <Text className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            LKR {Number(route.price).toLocaleString()}
+          </Text>
         </View>
+
+        {route.available_seats > 0 ? (
+          <Button title="Book seat" onPress={onPress} />
+        ) : (
+          <View className="border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 items-center">
+            <Text className="text-sm text-slate-400">Full</Text>
+          </View>
+        )}
       </Card>
     </Pressable>
   )
 }
 
 export default function HomeScreen({ navigation }) {
+  const today = dayjs().format('YYYY-MM-DD')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
+  const [date, setDate] = useState(today)
   const [routes, setRoutes] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const handleSearch = useCallback(async () => {
+  const fetchRoutes = useCallback(async (f, t2, d) => {
     setLoading(true)
     try {
-      const res = await getRoutes({ from_location: from, to_location: to, date })
-      setRoutes(res.data.data ?? res.data)
+      const params = { date: d }
+      if (f) params.from = f
+      if (t2) params.to = t2
+      const res = await getRoutes(params)
+      setRoutes(res.data.routes ?? [])
+    } catch {
+      // leave routes as-is; could add a toast here if desired
     } finally {
       setLoading(false)
-      setSearched(true)
     }
-  }, [from, to, date])
+  }, [])
+
+  // Load today's routes as soon as the screen mounts — same as web HomePage.
+  useEffect(() => {
+    fetchRoutes('', '', today)
+  }, [])
+
+  const handleSearch = () => fetchRoutes(from, to, date)
 
   const handleSeatsUpdate = (routeId, availableSeats) => {
     setRoutes((prev) => prev.map((r) => (r.id === routeId ? { ...r, available_seats: availableSeats } : r)))
@@ -74,34 +97,31 @@ export default function HomeScreen({ navigation }) {
   return (
     <View className="flex-1 bg-slate-50 dark:bg-slate-950 p-4">
       <Card className="p-4 mb-4 gap-3">
+        <Text className="text-lg font-bold text-slate-800 dark:text-white">Find your bus</Text>
         <Input label="From" value={from} onChangeText={setFrom} placeholder="e.g. Colombo" />
         <Input label="To" value={to} onChangeText={setTo} placeholder="e.g. Kandy" />
         <Input label="Date" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
         <Button title="Search buses" onPress={handleSearch} loading={loading} />
       </Card>
 
-      {loading && !searched ? (
-        <Spinner />
-      ) : (
-        <FlatList
-          data={routes}
-          keyExtractor={(item) => String(item.id)}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={handleSearch} />}
-          renderItem={({ item }) => (
-            <RouteCard
-              route={item}
-              date={date}
-              onSeatsUpdate={handleSeatsUpdate}
-              onPress={() => navigation.navigate('Booking', { routeId: item.id, date })}
-            />
-          )}
-          ListEmptyComponent={
-            searched ? (
-              <Text className="text-center text-slate-400 mt-8">No buses found for this route/date.</Text>
-            ) : null
-          }
-        />
-      )}
+      <FlatList
+        data={routes}
+        keyExtractor={(item) => String(item.id)}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={handleSearch} />}
+        renderItem={({ item }) => (
+          <RouteCard
+            route={item}
+            date={date}
+            onSeatsUpdate={handleSeatsUpdate}
+            onPress={() => navigation.navigate('Booking', { routeId: item.id, date })}
+          />
+        )}
+        ListEmptyComponent={
+          !loading ? (
+            <Text className="text-center text-slate-400 mt-8">No buses found for this route/date.</Text>
+          ) : null
+        }
+      />
     </View>
   )
 }
