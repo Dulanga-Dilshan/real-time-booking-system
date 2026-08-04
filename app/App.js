@@ -7,6 +7,14 @@ import { setUnauthorizedHandler } from '@/api/client'
 import RootNavigator from '@/navigation/RootNavigator'
 import './global.css'
 
+if (global.ErrorUtils) {
+  const defaultHandler = global.ErrorUtils.getGlobalHandler()
+  global.ErrorUtils.setGlobalHandler((error, isFatal) => {
+    console.log('GLOBAL JS ERROR', isFatal ? '(fatal)' : '(non-fatal)', error)
+    defaultHandler(error, isFatal)
+  })
+}
+
 export default function App() {
   const hydrate = useAuthStore((s) => s.hydrate)
   const hydrated = useAuthStore((s) => s.hydrated)
