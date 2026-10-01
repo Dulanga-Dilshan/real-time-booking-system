@@ -33,7 +33,7 @@
     "zustand": "^5.0.14"
   },
   "scripts": {
-    "start": "expo start",
+    "start": "node init && expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
